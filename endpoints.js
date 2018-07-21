@@ -1,3 +1,9 @@
+/*
+* All the endpoints are listed here.
+* Do NOT write the endpoint URL's in the requests it self.
+* If discord ever changes their endpoints we can easily change it here
+*/
+
 module.exports = {
   BASE_URL: function() { return 'https://discordapp.com/api/v6' },
   GET_AUDIT_LOG: function(guildid) {
@@ -251,5 +257,8 @@ module.exports = {
   },
   EXECUTE_GITHUB_WEBHOOK: function(webhookid, webhooktoken) {
     return "/webhooks/" + webhookid + "/" + webhooktoken + "/github"
+  },
+  GET_GATEWAY_BOT: function() {
+    return "/gateway/bot"
   }
 }
