@@ -1,0 +1,19 @@
+{
+  "name": "discord.muur",
+  "version": "1.0.0",
+  "description": "A discord library",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "discord",
+    "library"
+  ],
+  "author": "Thomasmuur",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^2.1.2",
+    "socket.io-client": "^2.1.1"
+  }
+}
