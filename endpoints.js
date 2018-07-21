@@ -249,9 +249,6 @@ module.exports = {
   EXECUTE_SLACK_WEBHOOK: function(webhookid, webhooktoken) {
     return "/webhooks/" + webhookid + "/" + webhooktoken + "/slack"
   },
-  EXECUTE_SLACK_WEBHOOK: function(webhookid, webhooktoken) {
-    return "/webhooks/" + webhookid + "/" + webhooktoken + "/slack"
-  },
   EXECUTE_GITHUB_WEBHOOK: function(webhookid, webhooktoken) {
     return "/webhooks/" + webhookid + "/" + webhooktoken + "/github"
   }
