@@ -12,7 +12,7 @@ class ApiHandler {
       }
     })
     const json = await response.json();
-    if (response.status == 401) return console.error('Invalid token. You can get a valid token from https://discordapp.com/developers/applications/')
+    if (response.status == 401) return console.error('Invalid token. You can get a valid token from https://discordapp.com/developers/applications/');
     return await json.url;
   }
 
