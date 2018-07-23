@@ -71,7 +71,14 @@ class WebSocket {
           */
           if ((gateway.last_heartbeat && !gateway.last_heartbeat_ack) || (gateway.last_heartbeat_ack < gateway.last_heartbeat)) {
             debug.emit('[WS] [ERROR] Did not receive heartbeat ACK between heartbeats. reconnecting');
-            // this is where we should code our reconnect
+
+            /*
+            * Here we will reconnect to the gateway. Once reconnected
+            * we won't send an IDENTIFY but an RESUME event
+            */
+            gateway.terminate();
+
+
             return;
           }
 
