@@ -1,5 +1,6 @@
 const WebSocket = require('../WebSocket');
 const BaseClient = require("./BaseClient");
+const ChannelStore = require('../stores/Channel');
 
 /**
  * The main hub for interacting with the Discord API, and the starting point for any bot.
@@ -11,6 +12,8 @@ class Client extends BaseClient {
    */
   constructor(options = {}) {
     super(Object.assign({ _tokenType: 'Bot' }, options));
+
+    this.channels = Channel(this);
   }
   /**
    * This endpoint is used to log the client into the gateway of discord
