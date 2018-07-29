@@ -16,6 +16,7 @@ class WebSocket {
 
     var parent = this;
     var session_id = null;
+    var sequence = null;
 
     /*
     * We make a API request to discordapp
@@ -35,7 +36,7 @@ class WebSocket {
       debug.emit('[WS] Connected to Discord Gateway');
       setTimeout(function(gateway) {
       const d = Object.assign({
-        token: token,
+        token: "Bot " + token,
         properties: {
           $os: 'windows',
           $browser: 'disco',
@@ -48,7 +49,7 @@ class WebSocket {
     });
 
     this.ws.on('message', function incoming(data) {
-      if (JSON.parse(data).op == 10) {
+      if (JSON.parse(data).op === OPCodes.HELLO) {
         debug.emit('[WS] [HELLO] Heartbeating @ ' + JSON.parse(data).d.heartbeat_interval + 'ms rate');
 
         /**
@@ -69,27 +70,30 @@ class WebSocket {
           * This is to check if we received a heartback ack between every heartbeat.
           * if not, we need to reconnect
           */
+          /*
           if ((gateway.last_heartbeat && !gateway.last_heartbeat_ack) || (gateway.last_heartbeat_ack < gateway.last_heartbeat)) {
             debug.emit('[WS] [ERROR] Did not receive heartbeat ACK between heartbeats. reconnecting');
-
+            */
             /*
             * Here we will reconnect to the gateway. Once reconnected
             * we won't send an IDENTIFY but an RESUME event
             */
+            /*
             gateway.terminate();
 
 
             return;
-          }
+          }*/
 
-          gateway.send(JSON.stringify({ op: OPCodes.HEARTBEAT }));
+          gateway.send(JSON.stringify({ op: OPCodes.HEARTBEAT, d: parent.sequence }));
+          console.log(parent.sequence)
           debug.emit('[WS] [HEARTBEAT] ->');
           gateway.last_heartbeat = date.getTime();
         }, JSON.parse(data).d.heartbeat_interval, this);
 
 
       }
-      if (JSON.parse(data).op == 1) {
+      if (JSON.parse(data).op === OPCodes.HEARTBEAT) {
         debug.emit('[WS] [HEARTBEART] <-');
 
         /*
@@ -97,14 +101,14 @@ class WebSocket {
         * the bot is still running, in that case we use the forceHeartbeat function.
         */
         debug.emit('[WS] [HEARTBEAT] ->');
-        this.send(JSON.stringify({ op: OPCodes.HEARTBEAT }));
+        this.send(JSON.stringify({ op: OPCodes.HEARTBEAT, d: parent.sequence }));
       }
-      if (JSON.parse(data).op == 7) {
+      if (JSON.parse(data).op === OPCodes.RECONNECT) {
         debug.emit('[WS] [RECONNECT] <-');
 
       }
-      if (JSON.parse(data).op == 9) debug.emit('[WS] [INVALID SESSION] <-');
-      if (JSON.parse(data).op == 11) {
+      if (JSON.parse(data).op === OPCodes.INVALID_SESSION) debug.emit('[WS] [INVALID SESSION] <-');
+      if (JSON.parse(data).op === OPCodes.HEARTBEAT_ACK) {
         /*
         * We are also registering the latest heartbeat ACK
         * to make sure we get a heartbeat ack between every heartbeat
@@ -114,9 +118,10 @@ class WebSocket {
         debug.emit('[WS] [HEARTBEAT ACK] <-');
         this.last_heartbeat_ack = date.getTime();
       }
-      if (JSON.parse(data).op == 0) {
+      if (JSON.parse(data).op === OPCodes.DISPATCH) {
         debug.emit('[WS] [DISPATCH] <-');
-        if (JSON.parse(data).t == "READY") {
+        parent.sequence = JSON.parse(data).s
+        if (JSON.parse(data).t === "READY") {
           session_id = JSON.parse(data).d.session_id
           debug.emit('[WS] [READY] <-');
         }
