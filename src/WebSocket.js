@@ -86,7 +86,6 @@ class WebSocket {
           }*/
 
           gateway.send(JSON.stringify({ op: OPCodes.HEARTBEAT, d: parent.sequence }));
-          console.log(parent.sequence)
           debug.emit('[WS] [HEARTBEAT] ->');
           gateway.last_heartbeat = date.getTime();
         }, JSON.parse(data).d.heartbeat_interval, this);
