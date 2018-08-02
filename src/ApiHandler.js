@@ -28,17 +28,6 @@ class ApiHandler {
     return await json;
   }
 
-  async get_all_channels(token) {
-    const response = await fetch(`${endpoints.BASE_URL() + endpoints.GET_CURRENT_USER_GUILDS()}`, {
-      method: 'GET',
-      headers: {
-        Authorization: "Bot " + token
-      }
-    })
-    const json = await response.json();
-    if (response.status == 401) return console.error('Invalid token. You can get a valid token from https://discordapp.com/developers/applications/');
-  }
-
 }
 
 module.exports = new ApiHandler();
