@@ -1,131 +1,110 @@
 const WebSockets = require('ws');
 const API = require('./ApiHandler');
 const debug = require('./debugger');
-const OPCodes = require('../opcodes');
+const opcodes = require('../opcodes');
 
+var main_this;
 
 class WebSocket {
 
-  /**
-  * Connecting to the discord gateway
-  * We connect and send the Opcode 2 Identify
-  * Discord will use this to identify your application
-  * @param {String} token, this is the bot token
-  */
-  async login(token) {
+  constructor() {
+    main_this = this;
+    this.sequence_number = null;
+  }
 
-    var parent = this;
-    var session_id = null;
-    var sequence = null;
+  async get_gateway(token) {
+    var response = await API.request('GET', 'GET_GATEWAY_BOT', token);
+    return response['url'];
+  }
 
-    /*
-    * We make a API request to discordapp
-    * this will return the gateway url
-    * by doing this we can be sure our gateway url is always up-to-date
-    * Then we make a websocket connection to the gateway using that URL
-    * We save this websocket connection in a variable as item of the WebSocket class
-    */
-    debug.emit(`[WS] Connecting to ${await API.get_gateway(token) + '/?v=6&encoding=json'}`);
-    this.ws = await new WebSockets(`${await API.get_gateway(token) + '/?v=6&encoding=json'}`);
+  async connect(token) {
+    var gateway_url = await this.get_gateway(token);
 
-    /*
-    * We are logging to our debugger if the socket connection is
-    * established
-    */
-    this.ws.on('open', async function open() {
-      debug.emit('[WS] Connected to Discord Gateway');
-      setTimeout(function(gateway) {
-      const d = Object.assign({
-        token: "Bot " + token,
-        properties: {
-          $os: 'windows',
-          $browser: 'disco',
-          $device: 'disco'
-        }
-      });
-      gateway.send(JSON.stringify({ op: OPCodes.IDENTIFY, d }));
-      debug.emit('[WS] [IDENTIFY] ->');
-    }, 500, this)
+    debug.emit('[WebSocket] Connecting to ' + gateway_url + '?v=6&encoding=json');
+    const ws = new WebSockets(gateway_url + '?v=6&encoding=json', {
+      perMessageDeflate: false
     });
 
-    this.ws.on('message', function incoming(data) {
-      if (JSON.parse(data).op === OPCodes.HELLO) {
-        debug.emit('[WS] [HELLO] Heartbeating @ ' + JSON.parse(data).d.heartbeat_interval + 'ms rate');
+    this.ws = ws;
+    this.token = token;
 
-        /**
-        * This will send a heartbeat to the discord Gateway
-        * so they can make sure that the bot is running
-        * the interval is specified by discord in the HELLO event.
-        * -
-        * We also specify when the last heartbeat and the last heartbeat ack was.
-        * This is to check if we receive an heartbeat ack between every heartbeat
-        * If we dont receive the heartbeat ack we should reconnect
-        */
+    ws.on('open', this.ws_open);
+    ws.on('message', this.ws_message);
+  }
 
-        this.last_heartbeat_ack = null;
-        this.last_heartbeat = null;
-        var date = new Date();
-        setInterval(function(gateway) {
-          /*
-          * This is to check if we received a heartback ack between every heartbeat.
-          * if not, we need to reconnect
-          */
-          /*
-          if ((gateway.last_heartbeat && !gateway.last_heartbeat_ack) || (gateway.last_heartbeat_ack < gateway.last_heartbeat)) {
-            debug.emit('[WS] [ERROR] Did not receive heartbeat ACK between heartbeats. reconnecting');
-            */
-            /*
-            * Here we will reconnect to the gateway. Once reconnected
-            * we won't send an IDENTIFY but an RESUME event
-            */
-            /*
-            gateway.terminate();
+  ws_open() {
+    debug.emit('[WebSocket] Connection established.');
+  }
 
+  ws_message(data) {
+    var json = JSON.parse(data);
 
-            return;
-          }*/
+    switch (json.op) {
+      case opcodes.DISPATCH:
+          debug.emit('[WebSocket] DISPATCH <-');
+          main_this.handle_dispatch(json);
+        break;
+      case opcodes.HEARTBEAT:
+          debug.emit('[WebSocket] HEARTBEAT <-');
+        break;
+      case opcodes.RECONNECT:
+          debug.emit('[WebSocket] RECONNECT <-');
+        break;
+      case opcodes.INVALID_SESSION:
+          debug.emit('[WebSocket] INVALID_SESSION <-');
+        break;
+      case opcodes.HELLO:
+          debug.emit('[WebSocket] HELLO <-');
+          main_this.identify();
+          main_this.start_heartbeating(json['d']['heartbeat_interval']);
+        break;
+      case opcodes.HEARTBEAT_ACK:
+          debug.emit('[WebSocket] HEARTBEAT_ACK <-');
+        break;
+    }
+  }
 
-          gateway.send(JSON.stringify({ op: OPCodes.HEARTBEAT, d: parent.sequence }));
-          debug.emit('[WS] [HEARTBEAT] ->');
-          gateway.last_heartbeat = date.getTime();
-        }, JSON.parse(data).d.heartbeat_interval, this);
-
-
-      }
-      if (JSON.parse(data).op === OPCodes.HEARTBEAT) {
-        debug.emit('[WS] [HEARTBEART] <-');
-
-        /*
-        * Sometimes discordapp asks us to send a heartbeat for them to make sure
-        * the bot is still running, in that case we use the forceHeartbeat function.
-        */
-        debug.emit('[WS] [HEARTBEAT] ->');
-        this.send(JSON.stringify({ op: OPCodes.HEARTBEAT, d: parent.sequence }));
-      }
-      if (JSON.parse(data).op === OPCodes.RECONNECT) {
-        debug.emit('[WS] [RECONNECT] <-');
-
-      }
-      if (JSON.parse(data).op === OPCodes.INVALID_SESSION) debug.emit('[WS] [INVALID SESSION] <-');
-      if (JSON.parse(data).op === OPCodes.HEARTBEAT_ACK) {
-        /*
-        * We are also registering the latest heartbeat ACK
-        * to make sure we get a heartbeat ack between every heartbeat
-        * if not, we should reconnect to the gateway
-        */
-        var date = new Date();
-        debug.emit('[WS] [HEARTBEAT ACK] <-');
-        this.last_heartbeat_ack = date.getTime();
-      }
-      if (JSON.parse(data).op === OPCodes.DISPATCH) {
-        debug.emit('[WS] [DISPATCH] <-');
-        parent.sequence = JSON.parse(data).s
-        if (JSON.parse(data).t === "READY") {
-          session_id = JSON.parse(data).d.session_id
-          debug.emit('[WS] [READY] <-');
+  identify() {
+    debug.emit('[WebSocket] IDENTIFY ->');
+    var data = {
+      op: opcodes.IDENTIFY,
+      d: {
+          token: "Bot " + this.token,
+          properties: {
+            $os: 'windows',
+            $browser: 'disco',
+            $device: 'disco'
+          }
         }
-      }
-    });
+    }
+    this.ws.send(JSON.stringify(data));
+  }
+
+  start_heartbeating(interval) {
+    this.send_heartbeat();
+    setInterval(this.send_heartbeat, interval - 1000);
+  }
+
+  send_heartbeat() {
+    debug.emit('[WebSocket] HEARTBEAT ->');
+    var data = {
+      op: opcodes.HEARTBEAT,
+      d: this.sequence_number
+    };
+    main_this.ws.send(JSON.stringify(data));
+  }
+
+  handle_dispatch(data) {
+    switch (data.t) {
+      case 'READY':
+
+        break;
+      default:
+
+    }
+  }
+
+  dispatch_ready(data) {
 
   }
 

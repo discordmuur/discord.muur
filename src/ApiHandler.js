@@ -4,27 +4,15 @@ const debug = require('./debugger');
 
 class ApiHandler {
 
-  async get_gateway(token) {
-    const response = await fetch(`${endpoints.BASE_URL() + endpoints.GET_GATEWAY_BOT()}`, {
-      method: 'GET',
-      headers: {
-        Authorization: token
-      }
-    })
+  async request(method, url, token = null, headers = {}, body = {}) {
+    if (token) headers['Authorization'] = token;
+    var options = {};
+    options['method'] = method;
+    if (headers !== {}) options['headers'] = headers;
+    if (method != 'GET' && body !== {}) options['body'] = JSON.stringify(body);
+    const response = await fetch(`${endpoints.BASE_URL() + endpoints[url]()}`, options);
     const json = await response.json();
-    if (response.status == 401) return console.error('Invalid token. You can get a valid token from https://discordapp.com/developers/applications/');
-    return await json.url;
-  }
-
-  async get_guilds(token) {
-    const response = await fetch(`${endpoints.BASE_URL() + endpoints.GET_CURRENT_USER_GUILDS()}`, {
-      method: 'GET',
-      headers: {
-        Authorization: "Bot " + token
-      }
-    })
-    const json = await response.json();
-    if (response.status == 401) return console.error('Invalid token. You can get a valid token from https://discordapp.com/developers/applications/');
+    if (response.status == 401) return new Error('Invalid token.');
     return await json;
   }
 

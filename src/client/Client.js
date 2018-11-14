@@ -1,19 +1,19 @@
 const WebSocket = require('../WebSocket');
-const BaseClient = require("./BaseClient");
-const ChannelSave = require('../saves/ChannelSave');
-const Channel = require('../models/Channel');
+
+var events = require('events');
+var eventEmitter = new events.EventEmitter();
 
 /**
- * The main hub for interacting with the Discord API, and the starting point for any bot.
- * @extends {BaseClient}
+ * The main interaction for the bot, this is THE bot.
  */
-class Client extends BaseClient {
+class Client {
   /**
-   * @param {ClientOptions} [options] Options for the client
+   * The constructor, here we will set most of the default settings for the client.
    */
   constructor(options = {}) {
-    super(Object.assign({ _tokenType: 'Bot' }, options));
+    this.events = eventEmitter;
   }
+
   /**
    * This endpoint is used to log the client into the gateway of discord
    * @param {String} token is the Bot Token
@@ -21,12 +21,12 @@ class Client extends BaseClient {
    */
   login(token, debug = false) {
     this.token = token;
-    WebSocket.login(token);
+    WebSocket.connect(token);
 
     /*
     * Here we will define all properties on the client.
     */
-    this.channels = new ChannelSave(this);
+
   }
 
 }
