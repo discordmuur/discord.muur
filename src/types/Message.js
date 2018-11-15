@@ -11,7 +11,6 @@ class Message {
   * @param {Boolean} push Do we want to push these changes to Discord's API?
   */
   save(push = true) {
-    var data = {};
 
     storage.messages[this.id] = {
       id: this.id,

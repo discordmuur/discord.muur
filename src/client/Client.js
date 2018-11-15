@@ -4,6 +4,9 @@ const { EventEmitter } = require('events')
 
 const storage = require('../storage');
 
+/* Saves */
+const ChannelSave = require('../saves/ChannelSave');
+
 /**
  * The main interaction for the bot, this is THE bot.
  */
@@ -17,10 +20,16 @@ class Client {
      * Accessable for client as "client.events"
      */
     this.events = new EventEmitter();
+
+    this.ws = new WebSocket(this);
     /**
      * Here we set a default for the token.
+     * @type {string}
      */
     this.token = null;
+
+    /* Creating our saves */
+    this.channels = ChannelSave;
   }
 
 
@@ -46,8 +55,7 @@ class Client {
    */
   login(token, debug = false) {
     this.token = token;
-    var socket = new WebSocket(this);
-    socket.connect(token, this);
+    this.ws.connect(token, this);
 
     /*
     * Here we will define all properties of the client.

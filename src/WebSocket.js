@@ -6,6 +6,10 @@ const opcodes = require('../opcodes');
 /* Our Types */
 const Guild = require('./types/Guild');
 const Message = require('./types/Message');
+const Channel = require('./types/Channel');
+
+/* Our Saves */
+const ChannelSave = require('./saves/ChannelSave');
 
 const types = require('../types');
 
@@ -136,8 +140,27 @@ class WebSocket {
         break;
       case 'GUILD_CREATE':
           debug.emit('[WebSocket] GUILD_CREATE <-');
-          var guild = new Guild(data['d']);
+          var guild = new Guild();
+          Object.keys(data['d']).forEach(function(key) {
+            guild[key] = data['d'][key]
+          });
           guild.save();
+
+          guild.channels.forEach(function(chnl) {           
+            ChannelSave.create({
+              id: chnl.id,
+              type: chnl.type,
+              topic: chnl.topic,
+              rate_limit_per_user: chnl.rate_limit_per_user,
+              position: chnl.position,
+              permission_overwrites: chnl.permission_overwrites,
+              parent_id: chnl.parent_id,
+              nsfw: chnl.nsfw,
+              name: chnl.name,
+              last_pin_timestamp: chnl.last_pin_timestamp,
+              last_message_id: chnl.last_message_id
+            }, false);
+          });
         break;
       case 'GUILD_UPDATE':
           debug.emit('[WebSocket] GUILD_UPDATE <-');
@@ -193,7 +216,8 @@ class WebSocket {
           Object.keys(data['d']).forEach(function(key) {
             message[key] = data['d'][key]
           });
-          message.save();
+          message.save(false);
+          main_this.client.events.emit('message', message);
         break;
       case 'MESSAGE_UPDATE':
           debug.emit('[WebSocket] MESSAGE_UPDATE <-');
