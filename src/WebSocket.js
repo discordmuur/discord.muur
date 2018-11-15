@@ -2,6 +2,11 @@ const WebSockets = require('ws');
 const API = require('./ApiHandler');
 const debug = require('./debugger');
 const opcodes = require('../opcodes');
+const ClientSave = require('./types/Client');
+const GuildSave = require('./types/Guild');
+const types = require('../types');
+
+const storage = require('./storage');
 
 var main_this;
 
@@ -81,22 +86,118 @@ class WebSocket {
   }
 
   start_heartbeating(interval) {
+    debug.emit('[WebSocket] Start heartbeating @ ' + interval + 'ms rate.');
     this.send_heartbeat();
-    setInterval(this.send_heartbeat, interval - 1000);
+    setInterval(this.send_heartbeat, interval);
   }
 
   send_heartbeat() {
     debug.emit('[WebSocket] HEARTBEAT ->');
     var data = {
       op: opcodes.HEARTBEAT,
-      d: this.sequence_number
+      d: main_this.sequence_number
     };
     main_this.ws.send(JSON.stringify(data));
   }
 
   handle_dispatch(data) {
-    switch (data.t) {
+    main_this.sequence_number = data.s;
+      switch (data.t) {
       case 'READY':
+          debug.emit('[WebSocket] READY <-');
+          var client = new ClientSave(data['d']['user']);
+          client.save();
+        break;
+      case 'CHANNEL_CREATE':
+
+        break;
+      case 'CHANNEL_UPDATE':
+
+        break;
+      case 'CHANNEL_DELETE':
+
+        break;
+      case 'CHANNEL_PINS_UPDATE':
+
+        break;
+      case 'GUILD_CREATE':
+          debug.emit('[WebSocket] GUILD_CREATE <-');
+          var guild = new GuildSave(data['d']);
+          guild.save();
+        break;
+      case 'GUILD_UPDATE':
+
+        break;
+      case 'GUILD_DELETE':
+
+        break;
+      case 'GUILD_BAN_ADD':
+
+        break;
+      case 'GUILD_BAN_REMOVE':
+
+        break;
+      case 'GUILD_EMOJIS_UPDATE':
+
+        break;
+      case 'GUILD_INTEGRATIONS_UPDATE':
+
+        break;
+      case 'GUILD_MEMBER_ADD':
+
+        break;
+      case 'GUILD_MEMBER_REMOVE':
+
+        break;
+      case 'GUILD_MEMBER_CHUNK':
+
+        break;
+      case 'GUILD_ROLE_CREATE':
+
+        break;
+      case 'GUILD_ROLE_UPDATE':
+
+        break;
+      case 'GUILD_ROLE_DELETE':
+
+        break;
+      case 'MESSAGE_CREATE':
+
+        break;
+      case 'MESSAGE_UPDATE':
+
+        break;
+      case 'MESSAGE_DELETE':
+
+        break;
+      case 'MESSAGE_DELETE_BULK':
+
+        break;
+      case 'MESSAGE_REACTION_ADD':
+
+        break;
+      case 'MESSAGE_REACTION_REMOVE':
+
+        break;
+      case 'MESSAGE_REACTION_REMOVE_ALL':
+
+        break;
+      case 'PRESENCE_UPDATE':
+
+        break;
+      case 'TYPING_START':
+
+        break;
+      case 'USER_UPDATE':
+
+        break;
+      case 'VOICE_STATE_UPDATE':
+
+        break;
+      case 'VOICE_SERVER_UPDATE':
+
+        break;
+      case 'WEBHOOKS_UPDATE':
 
         break;
       default:
