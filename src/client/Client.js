@@ -1,7 +1,6 @@
 const WebSocket = require('../WebSocket');
 
-var events = require('events');
-var eventEmitter = new events.EventEmitter();
+const { EventEmitter } = require('events')
 
 /**
  * The main interaction for the bot, this is THE bot.
@@ -14,7 +13,7 @@ class Client {
     /**
      * 
      */
-    this.events = eventEmitter;
+    this.events = new EventEmitter();
     /**
      * 
      */
