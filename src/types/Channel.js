@@ -2,8 +2,6 @@ const storage = require('../storage');
 
 const API = require('../ApiHandler');
 
-const resolvePromise = require('../utils/resolve');
-
 class Channel {
 
   /*
