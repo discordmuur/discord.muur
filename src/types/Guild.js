@@ -3,11 +3,11 @@ const storage = require('../storage');
 class Guild {
 
   constructor(data) {
-    this.guild = data;
+    this.d = data;
   }
 
   save() {
-    storage.guilds[this.guild.id] = this;
+    storage.guilds[this.d.id] = this;
   }
 
 }

@@ -2,6 +2,8 @@ const WebSocket = require('../WebSocket');
 
 const { EventEmitter } = require('events')
 
+const storage = require('../storage');
+
 /**
  * The main interaction for the bot, this is THE bot.
  */
@@ -11,13 +13,30 @@ class Client {
    */
   constructor(options = {}) {
     /**
-     * 
+     * Here we will make a events attribute, we will emit events through this.
+     * Accessable for client as "client.events"
      */
     this.events = new EventEmitter();
     /**
-     * 
+     * Here we set a default for the token.
      */
     this.token = null;
+  }
+
+
+  /*
+  * Used to save the changes that have been made to the client.
+  * @param {Boolean} push Do we want to push these changes to Discord's API?
+  */
+  save(push = true) {
+    var data = {
+      id: this.id,
+      username: this.username,
+      discriminator: this.discriminator,
+      avatar: this.avatar,
+      bot: this.bot
+    }
+    storage.client = data;
   }
 
   /**
@@ -27,7 +46,8 @@ class Client {
    */
   login(token, debug = false) {
     this.token = token;
-    WebSocket.connect(token);
+    var socket = new WebSocket(this);
+    socket.connect(token, this);
 
     /*
     * Here we will define all properties of the client.

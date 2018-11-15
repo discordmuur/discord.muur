@@ -2,8 +2,11 @@ const WebSockets = require('ws');
 const API = require('./ApiHandler');
 const debug = require('./debugger');
 const opcodes = require('../opcodes');
-const ClientSave = require('./types/Client');
-const GuildSave = require('./types/Guild');
+
+/* Our Types */
+const Guild = require('./types/Guild');
+const Message = require('./types/Message');
+
 const types = require('../types');
 
 const storage = require('./storage');
@@ -12,7 +15,8 @@ var main_this;
 
 class WebSocket {
 
-  constructor() {
+  constructor(client_instance) {
+    this.client = client_instance;
     main_this = this;
     this.sequence_number = null;
   }
@@ -105,99 +109,138 @@ class WebSocket {
       switch (data.t) {
       case 'READY':
           debug.emit('[WebSocket] READY <-');
-          var client = new ClientSave(data['d']['user']);
-          client.save();
+
+          main_this.client.id = data['d']['user']['id'];
+          main_this.client.username = data['d']['user']['username'];
+          main_this.client.discriminator = data['d']['user']['discriminator'];
+          main_this.client.avatar = data['d']['user']['avatar'];
+          main_this.client.bot = data['d']['user']['avatar'];
+          main_this.client.save(false);
+
+          main_this.client.events.emit('ready');
         break;
       case 'CHANNEL_CREATE':
-
+          debug.emit('[WebSocket] CHANNEL_CREATE <-');
         break;
       case 'CHANNEL_UPDATE':
+          debug.emit('[WebSocket] CHANNEL_UPDATE <-');
 
         break;
       case 'CHANNEL_DELETE':
+          debug.emit('[WebSocket] CHANNEL_DELETE <-');
 
         break;
       case 'CHANNEL_PINS_UPDATE':
+          debug.emit('[WebSocket] CHANNEL_PINS_UPDATE <-');
 
         break;
       case 'GUILD_CREATE':
           debug.emit('[WebSocket] GUILD_CREATE <-');
-          var guild = new GuildSave(data['d']);
+          var guild = new Guild(data['d']);
           guild.save();
         break;
       case 'GUILD_UPDATE':
+          debug.emit('[WebSocket] GUILD_UPDATE <-');
 
         break;
       case 'GUILD_DELETE':
+          debug.emit('[WebSocket] GUILD_DELETE <-');
 
         break;
       case 'GUILD_BAN_ADD':
+          debug.emit('[WebSocket] GUILD_BAN_ADD <-');
 
         break;
       case 'GUILD_BAN_REMOVE':
+          debug.emit('[WebSocket] GUILD_BAN_REMOVE <-');
 
         break;
       case 'GUILD_EMOJIS_UPDATE':
+          debug.emit('[WebSocket] GUILD_EMOJIS_UPDATE <-');
 
         break;
       case 'GUILD_INTEGRATIONS_UPDATE':
+          debug.emit('[WebSocket] GUILD_INTEGRATIONS_UPDATE <-');
 
         break;
       case 'GUILD_MEMBER_ADD':
+          debug.emit('[WebSocket] GUILD_MEMBER_ADD <-');
 
         break;
       case 'GUILD_MEMBER_REMOVE':
+          debug.emit('[WebSocket] GUILD_MEMBER_REMOVE <-');
 
         break;
       case 'GUILD_MEMBER_CHUNK':
+          debug.emit('[WebSocket] GUILD_MEMBER_CHUNK <-');
 
         break;
       case 'GUILD_ROLE_CREATE':
+          debug.emit('[WebSocket] GUILD_ROLE_CREATE <-');
 
         break;
       case 'GUILD_ROLE_UPDATE':
+          debug.emit('[WebSocket] GUILD_ROLE_UPDATE <-');
 
         break;
       case 'GUILD_ROLE_DELETE':
+          debug.emit('[WebSocket] GUILD_ROLE_DELETE <-');
 
         break;
       case 'MESSAGE_CREATE':
-
+          debug.emit('[WebSocket] MESSAGE_CREATE <-');
+          var message = new Message();
+          Object.keys(data['d']).forEach(function(key) {
+            message[key] = data['d'][key]
+          });
+          message.save();
         break;
       case 'MESSAGE_UPDATE':
+          debug.emit('[WebSocket] MESSAGE_UPDATE <-');
 
         break;
       case 'MESSAGE_DELETE':
+          debug.emit('[WebSocket] MESSAGE_DELETE <-');
 
         break;
       case 'MESSAGE_DELETE_BULK':
+          debug.emit('[WebSocket] MESSAGE_DELETE_BULK <-');
 
         break;
       case 'MESSAGE_REACTION_ADD':
+          debug.emit('[WebSocket] MESSAGE_REACTION_ADD <-');
 
         break;
       case 'MESSAGE_REACTION_REMOVE':
+          debug.emit('[WebSocket] MESSAGE_REACTION_REMOVE <-');
 
         break;
       case 'MESSAGE_REACTION_REMOVE_ALL':
+          debug.emit('[WebSocket] MESSAGE_REACTION_REMOVE_ALL <-');
 
         break;
       case 'PRESENCE_UPDATE':
+          debug.emit('[WebSocket] PRESENCE_UPDATE <-');
 
         break;
       case 'TYPING_START':
+          debug.emit('[WebSocket] TYPING_START <-');
 
         break;
       case 'USER_UPDATE':
+          debug.emit('[WebSocket] USER_UPDATE <-');
 
         break;
       case 'VOICE_STATE_UPDATE':
+          debug.emit('[WebSocket] VOICE_STATE_UPDATE <-');
 
         break;
       case 'VOICE_SERVER_UPDATE':
+          debug.emit('[WebSocket] VOICE_SERVER_UPDATE <-');
 
         break;
       case 'WEBHOOKS_UPDATE':
+          debug.emit('[WebSocket] WEBHOOKS_UPDATE <-');
 
         break;
       default:
@@ -205,10 +248,6 @@ class WebSocket {
     }
   }
 
-  dispatch_ready(data) {
-
-  }
-
 }
 
-module.exports = new WebSocket();
+module.exports = WebSocket;
