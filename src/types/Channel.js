@@ -21,7 +21,7 @@ class Channel {
   }
 
   async send(content) {
-    var response = await API.request('POST', {url: 'CREATE_MESSAGE', params: [this.id]}, 'Bot MzkwMTYxODA3NjMwOTI1ODI0.Ds8qFA.gBrudExaM-XnM2aX-rMOM93A_eQ', {
+    var response = await API.request('POST', {url: 'CREATE_MESSAGE', params: [this.id]}, 'Bot ' + storage.token, {
       content: content
     });
     return response;

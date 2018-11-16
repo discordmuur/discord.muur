@@ -55,6 +55,7 @@ class Client {
    */
   login(token, debug = false) {
     this.token = token;
+    storage.token = token;
     this.ws.connect(token, this);
 
     /*

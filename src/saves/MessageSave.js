@@ -14,7 +14,7 @@ class MessageSave {
 
     create(options, push = true) {
         var message = new Message(options, push);
-        storage.message[message.id] = message;
+        storage.messages[message.id] = message;
         return message;
     }
 

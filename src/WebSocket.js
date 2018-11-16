@@ -25,6 +25,10 @@ class WebSocket {
     this.client = client_instance;
     main_this = this;
     this.sequence_number = null;
+    this.last_heartbeat_ack = null;
+    this.last_heartbeat = null;
+    this.session_id = null;
+    this.resuming = false;
   }
 
   async get_gateway(token) {
@@ -32,11 +36,11 @@ class WebSocket {
     return response['url'];
   }
 
-  async connect(token) {
-    var gateway_url = await this.get_gateway(token);
+  async connect(token, resume = false) {
+    this.gateway_url = await this.get_gateway(token);
 
-    debug.emit('[WebSocket] Connecting to ' + gateway_url + '?v=6&encoding=json');
-    const ws = new WebSockets(gateway_url + '?v=6&encoding=json', {
+    debug.emit('[WebSocket] Connecting to ' + this.gateway_url + '?v=6&encoding=json');
+    const ws = new WebSockets(this.gateway_url + '?v=6&encoding=json', {
       perMessageDeflate: false
     });
 
@@ -67,14 +71,17 @@ class WebSocket {
         break;
       case opcodes.INVALID_SESSION:
           debug.emit('[WebSocket] INVALID_SESSION <-');
+          main_this.reconnect()
         break;
       case opcodes.HELLO:
           debug.emit('[WebSocket] HELLO <-');
-          main_this.identify();
+          if (main_this.resuming) {main_this.identify();} else {main_this.identify()}
           main_this.start_heartbeating(json['d']['heartbeat_interval']);
         break;
       case opcodes.HEARTBEAT_ACK:
           debug.emit('[WebSocket] HEARTBEAT_ACK <-');
+          var d = new Date();
+          this.last_heartbeat_ack = d.getTime();
         break;
     }
   }
@@ -107,7 +114,29 @@ class WebSocket {
       op: opcodes.HEARTBEAT,
       d: main_this.sequence_number
     };
+    if (this.last_heartbeat > this.last_heartbeat_ack) return this.reconnect(true);
+    var d = new Date();
+    this.last_heartbeat = d.getTime();
     main_this.ws.send(JSON.stringify(data));
+  }
+
+  reconnect(resume = false) {
+    debug.emit('[WebSocket] Closed Connection.');
+    this.ws.close(4000);
+    this.resuming = resume;
+    this.connect(this.token, resume);
+  }
+
+  resume() {
+    debug.emit('[WebSocket] RESUME ->');
+    var data = {
+      op: opcodes.RESUME,
+      d: {
+          token: "Bot " + this.token,
+          session_id: this.session_id,
+        }
+    }
+    this.ws.send(JSON.stringify(data));
   }
 
   handle_dispatch(data) {
@@ -115,6 +144,8 @@ class WebSocket {
       switch (data.t) {
       case 'READY':
           debug.emit('[WebSocket] READY <-');
+
+          main_this.session_id = data['d']['session_id'];
 
           main_this.client.id = data['d']['user']['id'];
           main_this.client.username = data['d']['user']['username'];
@@ -127,6 +158,7 @@ class WebSocket {
         break;
       case 'CHANNEL_CREATE':
           debug.emit('[WebSocket] CHANNEL_CREATE <-');
+
         break;
       case 'CHANNEL_UPDATE':
           debug.emit('[WebSocket] CHANNEL_UPDATE <-');
@@ -198,7 +230,7 @@ class WebSocket {
         break;
       case 'MESSAGE_CREATE':
           debug.emit('[WebSocket] MESSAGE_CREATE <-');
-          var message = new Message(data['d'], false);
+          var message = MessageSave.create(data['d'], false);
           main_this.client.events.emit('message', message);
         break;
       case 'MESSAGE_UPDATE':
