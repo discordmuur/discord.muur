@@ -2,7 +2,7 @@ const storage = require('../storage');
 class User {
 
 
-  constructor(options, push) {
+  constructor(options) {
     Object.keys(options).forEach(key => {
       this[key] = options[key];
     });
