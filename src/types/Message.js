@@ -1,5 +1,6 @@
 const storage = require('../storage');
 const ChannelSave = require('../saves/ChannelSave');
+const GuildSave = require('../saves/GuildSave');
 
 const UserSave = require('../saves/UserSave');
 
@@ -14,9 +15,13 @@ class Message {
 
     if (!UserSave.get(this.author.id)) {
       this.author = UserSave.create(this.author);
+    } else {
+      this.author = UserSave.get(this.author.id);
     }
 
     this.channel = ChannelSave.get(options.channel_id, push);
+
+    this.guild = GuildSave.get(options.guild_id, push);
 
     return this;
   }

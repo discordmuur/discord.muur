@@ -1,17 +1,18 @@
 const fetch = require('node-fetch');
 const endpoints = require('../endpoints');
 const debug = require('./debugger');
+const storage = require('./storage');
 
 class ApiHandler {
 
-  async request(method, url, token = null, body = {}, headers = {}) {
+  async request(method, url, auth = false, body = {}, headers = {}) {
     var url_endpoint;
     if (typeof(url) === 'object') {
       url_endpoint = endpoints[url.url](url.params.join(', '));
     } else {
       url_endpoint = endpoints[url]();
     }
-    if (token) headers['Authorization'] = token;
+    if (auth) headers['Authorization'] = 'Bot ' + storage.token;
     var options = {};
     options['method'] = method;
     if (method != 'GET' && body !== {}) {
