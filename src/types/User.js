@@ -7,6 +7,9 @@ class User {
       this[key] = options[key];
     });
 
+    this.tag = this.username + '#' + this.discriminator;
+    this.mention = '<@' + this.id + '>';
+
     return this;
   }
 
