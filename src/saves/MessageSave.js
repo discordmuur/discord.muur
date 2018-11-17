@@ -27,7 +27,14 @@ class MessageSave {
     * @param {Boolean} push If we want to push a new Message to Discord.
     */
     create(options, push = true) {
-        var message = new Message(options, push);
+        if (typeof options === 'object') {
+          var final_options = options;
+        } else {
+          var final_options = {
+            content: options
+          }
+        }
+        var message = new Message(final_options, push);
         storage.messages[message.id] = message;
         return message;
     }
