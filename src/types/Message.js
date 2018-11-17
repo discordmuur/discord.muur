@@ -37,7 +37,7 @@ class Message {
   }
 
   /**
-  * Save the changes that we made to the Discord Guild
+  * Save the changes that we made to the Discord Message
   * @param {Boolean} push If we want to push these changes to Discord.
   */
   save(push = true) {
