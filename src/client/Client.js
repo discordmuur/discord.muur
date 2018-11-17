@@ -54,6 +54,7 @@ class Client {
    * @param {Boolean} debug This states if the package will log debug messages to console. defaults to false
    */
   login(token, debug = false) {
+    storage.debug = debug;
     this.token = token;
     storage.token = token;
     this.ws.connect(token, this);
