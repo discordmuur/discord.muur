@@ -33,7 +33,7 @@ class Client {
   }
 
 
-  /*
+  /**
   * Used to save the changes that have been made to the client.
   * @param {Boolean} push Do we want to push these changes to Discord's API?
   */

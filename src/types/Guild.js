@@ -3,7 +3,7 @@ const User = require("./User");
 
 class Guild {
 
-  /*
+  /**
   * This function gets triggered by default
   * when creating the Guild instance.
   * @param {Object} options the options on the guild.
@@ -15,7 +15,7 @@ class Guild {
     });
   }
 
-  /*
+  /**
   * Save the changes that we made to the Discord Guild
   * @param {Boolean} push If we want to push these changes to Discord.
   */
