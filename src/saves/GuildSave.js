@@ -4,7 +4,7 @@ const Guild = require('../types/Guild');
 
 class GuildSave {
 
-    /*
+    /**
     * This function gets triggered by default.
     */
     constructor() {
@@ -12,7 +12,7 @@ class GuildSave {
         this.guilds = storage.guilds;
     }
 
-    /*
+    /**
     * Find a Guild
     * @param {String} id A Discord snowflake
     */
@@ -20,7 +20,7 @@ class GuildSave {
         return storage.guilds[id];
     }
 
-    /*
+    /**
     * If we want to create a guild
     * This can be in our cache only, or also on Discord
     * @param {Object} options The data on the guild

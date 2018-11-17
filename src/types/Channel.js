@@ -6,7 +6,7 @@ const MessageSave = require('../saves/MessageSave');
 
 class Channel {
 
-  /*
+  /**
   * GUILD_TEXT      0
   * DM              1
   * GUILD_VOICE     2
@@ -14,7 +14,7 @@ class Channel {
   * GUILD_CATEGORY  4
   */
 
-  /*
+  /**
   * This function gets triggered by default
   * when creating the Channel instance.
   * @param {Object} options the options on the channel.
@@ -28,7 +28,7 @@ class Channel {
     return this;
   }
 
-  /*
+  /**
   * This function is used to send a message to Discord
   * @param {String} content The content of this message.
   */
@@ -37,7 +37,7 @@ class Channel {
     return message;
   }
 
-  /*
+  /**
   * Save the changes that we made to the Discord Channel
   * @param {Boolean} push If we want to push these changes to Discord.
   */

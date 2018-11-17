@@ -5,7 +5,7 @@ const storage = require('./storage');
 
 class ApiHandler {
 
-  /*
+  /**
   * The main function to make an API call to Discord's API.
   * @param {String} method the HTTP method (GET, POST, PUT, PATCH, DELETE)
   * @param {String} url the url string code, defined in endpoints.js

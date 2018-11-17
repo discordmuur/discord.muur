@@ -4,7 +4,7 @@ const Channel = require('../types/Channel');
 
 class ChannelSave {
 
-    /*
+    /**
     * This function gets triggered by default.
     */
     constructor() {
@@ -12,7 +12,7 @@ class ChannelSave {
         this.channels = storage.channels;
     }
 
-    /*
+    /**
     * Find a channel
     * @param {String} id A Discord snowflake.
     */
@@ -20,7 +20,7 @@ class ChannelSave {
         return storage.channels[id];
     }
 
-    /*
+    /**
     * If we want to create a channel
     * This can be in our cache only, or also on Discord
     * @param {Object} options The data on the channels
