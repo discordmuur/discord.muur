@@ -2,6 +2,8 @@ const storage = require('../storage');
 
 const API = require('../ApiHandler');
 
+const MessageSave = require('../saves/MessageSave');
+
 class Channel {
 
   /*
@@ -21,10 +23,14 @@ class Channel {
   }
 
   async send(content) {
-    var response = await API.request('POST', {url: 'CREATE_MESSAGE', params: [this.id]}, true, {
-      content: content
-    });
-    return response;
+    var final_object;
+    if (typeof content === 'object') {
+      content['channel_id'] = this.id;
+      final_object = content;
+    } else if (typeof content === 'string') {
+      final_object = {content: content, channel_id: this.id}
+    }
+    MessageSave.create(final_object);
   }
 
   save(push = true) {
