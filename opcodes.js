@@ -1,4 +1,4 @@
-/*
+/**
 * This are the Gateway Opcodes.
 * The Gateway Opcodes are all numbers
 * We basically only do this to make it more readable for us while coding

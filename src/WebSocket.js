@@ -31,13 +31,21 @@ class WebSocket {
     this.resuming = false;
   }
 
-  async get_gateway(token) {
-    var response = await API.request('GET', 'GET_GATEWAY_BOT', token);
+  /*
+  * Make a request to get the Gateway URL
+  */
+  async get_gateway() {
+    var response = await API.request('GET', 'GET_GATEWAY_BOT', true);
     return response['url'];
   }
 
+  /*
+  * Our function to connect to the Discord API Gateway.
+  * @param {String} token the Bot's token, we use this to identify ourself.
+  * @param {Boolean} resume if we are sending a resume event to discord.
+  */
   async connect(token, resume = false) {
-    this.gateway_url = await this.get_gateway(token);
+    this.gateway_url = await this.get_gateway();
 
     debug.emit('[WebSocket] Connecting to ' + this.gateway_url + '?v=6&encoding=json');
     const ws = new WebSockets(this.gateway_url + '?v=6&encoding=json', {
@@ -51,10 +59,17 @@ class WebSocket {
     ws.on('message', this.ws_message);
   }
 
+  /*
+  * This function gets triggered when the Gateway connection is established.
+  */
   ws_open() {
     debug.emit('[WebSocket] Connection established.');
   }
 
+  /*
+  * This function gets triggered when a message is received
+  * @param {String} data the data we receive from Discord's Gateway
+  */
   ws_message(data) {
     var json = JSON.parse(data);
 
@@ -86,6 +101,9 @@ class WebSocket {
     }
   }
 
+  /*
+  * This function is used to identify ourself to Discord.
+  */
   identify() {
     debug.emit('[WebSocket] IDENTIFY ->');
     var data = {
@@ -102,12 +120,19 @@ class WebSocket {
     this.ws.send(JSON.stringify(data));
   }
 
+  /*
+  * This function starts the heartbeating process.
+  * @param {Integer} interval the heartbeat interval, defined by Discord's "HELLO" event.
+  */
   start_heartbeating(interval) {
     debug.emit('[WebSocket] Start heartbeating @ ' + interval + 'ms rate.');
     this.send_heartbeat();
     setInterval(this.send_heartbeat, interval);
   }
 
+  /*
+  * Everytime this function is triggered, we send an heartbeat to Discord.
+  */
   send_heartbeat() {
     debug.emit('[WebSocket] HEARTBEAT ->');
     var data = {
@@ -120,6 +145,10 @@ class WebSocket {
     main_this.ws.send(JSON.stringify(data));
   }
 
+  /*
+  * This disconnects ourself from the Gateway and starts over the process.
+  * @param {Boolean} resume do we want to continue with a resume event?
+  */
   reconnect(resume = false) {
     debug.emit('[WebSocket] Closed Connection.');
     this.ws.close(4000);
@@ -127,6 +156,9 @@ class WebSocket {
     this.connect(this.token, resume);
   }
 
+  /*
+  * Send our resume event to discord.
+  */
   resume() {
     debug.emit('[WebSocket] RESUME ->');
     var data = {
@@ -139,6 +171,10 @@ class WebSocket {
     this.ws.send(JSON.stringify(data));
   }
 
+  /*
+  * If we receive a DISPATCH event, this is where we handle the data.
+  * @param {Object} data The data we got from Discord.
+  */
   handle_dispatch(data) {
     main_this.sequence_number = data.s;
       switch (data.t) {
@@ -281,8 +317,6 @@ class WebSocket {
           debug.emit('[WebSocket] WEBHOOKS_UPDATE <-');
 
         break;
-      default:
-
     }
   }
 

@@ -9,8 +9,6 @@ class User {
 
     this.tag = this.username + '#' + this.discriminator;
     this.mention = '<@' + this.id + '>';
-
-    return this;
   }
 
 }

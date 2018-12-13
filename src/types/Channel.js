@@ -6,7 +6,7 @@ const MessageSave = require('../saves/MessageSave');
 
 class Channel {
 
-  /*
+  /**
   * GUILD_TEXT      0
   * DM              1
   * GUILD_VOICE     2
@@ -14,6 +14,12 @@ class Channel {
   * GUILD_CATEGORY  4
   */
 
+  /**
+  * This function gets triggered by default
+  * when creating the Channel instance.
+  * @param {Object} options the options on the channel.
+  * @param {Boolean} push If we will push this channel to Discord
+  */
   constructor(options, push) {
     Object.keys(options).forEach(key => {
       this[key] = options[key];
@@ -22,6 +28,10 @@ class Channel {
     return this;
   }
 
+  /**
+  * This function is used to send a message to Discord
+  * @param {String} content The content of this message.
+  */
   async send(content) {
     var final_object;
     if (typeof content === 'object') {
@@ -33,6 +43,10 @@ class Channel {
     MessageSave.create(final_object);
   }
 
+  /**
+  * Save the changes that we made to the Discord Channel
+  * @param {Boolean} push If we want to push these changes to Discord.
+  */
   save(push = true) {
     var data = {
       id: this.id,

@@ -3,14 +3,22 @@ const User = require("./User");
 
 class Guild {
 
+  /**
+  * This function gets triggered by default
+  * when creating the Guild instance.
+  * @param {Object} options the options on the guild.
+  * @param {Boolean} push If we will push this guild to Discord
+  */
   constructor(options, push) {
     Object.keys(options).forEach(key => {
       this[key] = options[key];
     });
-
-    return this;
   }
 
+  /**
+  * Save the changes that we made to the Discord Guild
+  * @param {Boolean} push If we want to push these changes to Discord.
+  */
   save(push = true) {
     var data = {
       id: this.id,

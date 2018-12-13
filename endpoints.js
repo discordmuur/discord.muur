@@ -1,4 +1,4 @@
-/*
+/**
 * All the endpoints are listed here.
 * Do NOT write the endpoint URL's in the requests it self.
 * If discord ever changes their endpoints we can easily change it here

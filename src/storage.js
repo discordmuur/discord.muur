@@ -5,3 +5,4 @@ exports.users = {};
 exports.messages = {};
 
 exports.token = '';
+exports.debug_mode = false;
